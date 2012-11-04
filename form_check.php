@@ -22,7 +22,7 @@
 		
 		function __destruct() {	/* Run any thing you need to when the class is deconstructed */	}
 		
-		function run_validation($error_page = NULL, $success_page = NULL) {
+		function run_validation($error_page = NULL, $success_page = NULL, $redirect = 1) {
 			if ($error_page == NULL) {
 				$error_page = $_SERVER['HTTP_REFERER'];
 			}
@@ -68,7 +68,7 @@
 				}
 			}
 			
-			if ($_SESSION['temp']['error']) {
+			if ($_SESSION['temp']['error'] && $redirect == 1) {
 				header('Location: ' . $error_page) or die('dying');
 				exit;
 			}
