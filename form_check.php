@@ -2,7 +2,7 @@
 	/* 
 		CLASS NAME: form_check
 		AUTHOR: Jason
-		DATE UPDATED: 27-09-2012
+		DATE UPDATED: 16-12-2012
 		
 		A class designed to be a way to validate forms in a standard way to avoid human errors
 		
