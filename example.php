@@ -33,7 +33,8 @@
 		);
 		
 		$validate = new form_check($fields);
-		$validate->run_validation(NULL, NULL, 0);
+		$validate->run_validation();
+		$validate->redirect();
 	}
 ?>
 

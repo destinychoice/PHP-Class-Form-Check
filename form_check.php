@@ -4,76 +4,76 @@
 		AUTHOR: Jason
 		DATE UPDATED: 27-09-2012
 		
-		This class is meant to standardise the way we check form input and reduce the amount of coding required on new sites.
+		A class designed to be a way to validate forms in a standard way to avoid human errors
 		
 		'rules' => 'required,email,number,telephone,mobile,postcode',
 	*/
 	class form_check {
 		
 		public $post_data;
+		public $error_page;
+		public $redirect;
 		
-		function __construct($user_post_data = NULL) {		
+		function __construct($user_post_data = NULL) {
+			$this->post_data = array();
+			$this->error_page = $_SERVER['HTTP_REFERER'];
+			$this->redirect = 0;
+			
 			if (is_array($user_post_data)) {
 				$this->post_data = $user_post_data;
-			} else {
-				$this->post_data = array();
-			}
+			} 
 		}
 		
 		function __destruct() {	/* Run any thing you need to when the class is deconstructed */	}
 		
-		function run_validation($error_page = NULL, $success_page = NULL, $redirect = 1) {
-			if ($error_page == NULL) {
-				$error_page = $_SERVER['HTTP_REFERER'];
-			}
-						
-			if ($this->post_data == array()) {
+		function run_validation() {	
+			if ($this->post_data == array() || empty($this->post_data)) {
 				exit("<pre>Post data is empty please correct.</pre>");
 			}
 			
-			$error = 0;
-			
 			foreach ($this->post_data as $key => $row) {
 				/* TEST FOR BLANK REQUIRED FIELD */
-				if (preg_match("/required/", $row['rules']) && $row['value'] == '') {
+				if (preg_match("/required/", $row['rules']) && empty($row['value'])) {
 					$_SESSION['temp']['error'][$key] = "$row[name] cannot be blank";
 				}
-				if ($row['value'] != '') {
+				/* DO THE FOLLOWING CHECKS ONLY IF NOT EMPTY */
+				if (!empty($row['value'])) {
+					/* TEST FOR EMAIL FIELDS */
 					if (preg_match('/email/', $row['rules']) && !preg_match("/^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)*(.[a-z]{2,3})$/i", $row['value'])) {
-						/* TEST FOR EMAIL FIELDS */
 						$_SESSION['temp']['error'][$key] = "$row[name] is an invalid email";
-						$error++;
 					}
-
+					/* TEST FOR NUMBER FIELDS */
 					if (preg_match('/number/', $row['rules']) && preg_match('/[^0-9]/', $row['value'])) {
-						/* TEST FOR NUMBER FIELDS */
 						$_SESSION['temp']['error'][$key] = "$row[name] can only contain numbers";
-						$error++;
 					}
-					if (preg_match('/telephone/', $row['rules']) && (preg_match('/[^0-9 \+]/', $row['value']) or $row['value'][7] == '')) {
-						/* TEST FOR TELEPHONE FIELDS */
+					/* TEST FOR TELEPHONE FIELDS */
+					if (preg_match('/telephone/', $row['rules']) && (preg_match('/[^0-9 \+]/', $row['value']) || $row['value'][7] == '')) {
 						$_SESSION['temp']['error'][$key] = "$row[name] seems to be an invalid phone number";
-						$error++;
 					}
-					if (preg_match('/mobile/', $row['rules']) && (preg_match('/[^0-9 \+]/', $row['value']) or $row['value'][9] == '')) {
-						/* TEST FOR MOBILE FIELDS */
+					/* TEST FOR MOBILE FIELDS */
+					if (preg_match('/mobile/', $row['rules']) && (preg_match('/[^0-9 \+]/', $row['value']) || $row['value'][9] == '')) {
 						$_SESSION['temp']['error'][$key] = "$row[name] seems to be an invalid mobile number";
-						$error++;
 					}
-					if (preg_match('/postcode/', $row['rules']) && (preg_match('/[^0-9]/', $row['value']) or $row['value'][3] == '')) {
-						/* TEST FOR MOBILE FIELDS */
+					/* TEST FOR POSTCODE FIELDS */
+					if (preg_match('/postcode/', $row['rules']) && (preg_match('/[^0-9]/', $row['value']) || $row['value'][3] == '')) {
 						$_SESSION['temp']['error'][$key] = "$row[name] seems to be an invalid postcode";
-						$error++;
 					}
 				}
-			}
-			
-			if ($_SESSION['temp']['error'] && $redirect == 1) {
-				header('Location: ' . $error_page) or die('dying');
-				exit;
 			}
 		}
 		
+		function redirect() {
+			if ($this->error_page == NULL) {
+				exit("<pre>Error page is empty please correct.</pre>");
+			}
+		
+			if ($_SESSION['temp']['error'] && $this->redirect == 1) {
+				header('Location: ' . $error_page);
+				exit;
+			}			
+		}
+		
+		// HELPER
 		// Creates a array of any fields in the $_post to make it easy to build the validation array
 		function generate_validation_list() {
 			$field = "\$field = array( \n";
