@@ -68,7 +68,7 @@
 			}
 		
 			if ($_SESSION['temp']['error'] && $this->redirect == 1) {
-				header('Location: ' . $error_page);
+				header('Location: ' . $this->error_page);
 				exit;
 			}			
 		}
